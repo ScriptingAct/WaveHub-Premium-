@@ -81,6 +81,31 @@ do
         end
     })
 
+    Tabs.Main:AddButton({
+        Title = "Nofall Damage",
+        Description = "Fun Script",
+        Callback = function()
+            Window:Dialog({
+                Title = "Confirm",
+                Content = "You want to execute this script ?",
+                Buttons = {
+                    {
+                        Title = "Confirm",
+                        Callback = function()
+                            loadstring(game:HttpGet("https://raw.githubusercontent.com/ScriptingAct/NofallDamage/refs/heads/main/NDS"))()
+                        end
+                    },
+                    {
+                        Title = "Cancel",
+                        Callback = function()
+                            print("Cancelled the dialog.")
+                        end
+                    }
+                }
+            })
+        end
+    })
+
 local Colorpicker = Tabs.Settings:AddColorpicker("Colorpicker", {
         Title = "Colorpicker",
         Default = Color3.fromRGB(96, 205, 255)

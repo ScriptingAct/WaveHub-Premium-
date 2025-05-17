@@ -82,6 +82,56 @@ do
         end
     })
 
+    Tabs.Main:AddButton({
+        Title = "Fast Walk",
+        Description = "Do not use stamina",
+        Callback = function()
+            Window:Dialog({
+                Title = "Confirm",
+                Content = "You want to execute this script ?",
+                Buttons = {
+                    {
+                        Title = "Confirm",
+                        Callback = function()
+                            loadstring(game:HttpGet("https://raw.githubusercontent.com/ScriptingAct/walksped/refs/heads/main/fortherake"))()
+                        end
+                    },
+                    {
+                        Title = "Cancel",
+                        Callback = function()
+                            print("Cancelled the dialog.")
+                        end
+                    }
+                }
+            })
+        end
+    })
+
+    Tabs.Main:AddButton({
+        Title = "Fov for Gaming",
+        Description = "Fov = 120",
+        Callback = function()
+            Window:Dialog({
+                Title = "Confirm",
+                Content = "You want to execute this script ?",
+                Buttons = {
+                    {
+                        Title = "Confirm",
+                        Callback = function()
+                            loadstring(game:HttpGet("https://pastebin.com/raw/Sf6E0pzH"))()
+                        end
+                    },
+                    {
+                        Title = "Cancel",
+                        Callback = function()
+                            print("Cancelled the dialog.")
+                        end
+                    }
+                }
+            })
+        end
+    })
+
 local Colorpicker = Tabs.Settings:AddColorpicker("Colorpicker", {
         Title = "Colorpicker",
         Default = Color3.fromRGB(96, 205, 255)

@@ -8,7 +8,7 @@ local Window = Fluent:CreateWindow({
     TabWidth = 160,
     Size = UDim2.fromOffset(580, 460),
     Acrylic = true, -- The blur may be detectable, setting this to false disables blur entirely
-    Theme = "Dark",
+    Theme = "Aqua",
     MinimizeKey = Enum.KeyCode.Delete -- Used when theres no MinimizeKeybind
 })
 
@@ -108,7 +108,7 @@ Tabs.Main:AddButton({
 
     Tabs.Main:AddButton({
         Title = "Fast Walker",
-        Description = "Bypass Speed Sr.",
+        Description = "Confirm Button Bug !",
         Callback = function()
             Window:Dialog({
                 Title = "Confirm",
@@ -122,7 +122,7 @@ Tabs.Main:AddButton({
                     },
                     {
                         Title = "Cancel",
-                            Callback = function()
+                        Callback = function()
                             print("Cancelled the dialog.")
                         end
                     }
@@ -130,7 +130,6 @@ Tabs.Main:AddButton({
             })
         end
     })
-
 local Colorpicker = Tabs.Settings:AddColorpicker("Colorpicker", {
         Title = "Colorpicker",
         Default = Color3.fromRGB(96, 205, 255)
@@ -163,7 +162,7 @@ local Colorpicker = Tabs.Settings:AddColorpicker("Colorpicker", {
     local Keybind = Tabs.Settings:AddKeybind("Keybind", {
         Title = "KeyBind",
         Mode = "Toggle", -- Always, Toggle, Hold
-        Default = "LeftControl", -- String as the name of the keybind (MB1, MB2 for mouse buttons)
+        Default = "Deleted", -- String as the name of the keybind (MB1, MB2 for mouse buttons)
 
         -- Occurs when the keybind is clicked, Value is `true`/`false`
         Callback = function(Value)

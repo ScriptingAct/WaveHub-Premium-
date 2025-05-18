@@ -92,7 +92,7 @@ Tabs.Main:AddButton({
                     {
                         Title = "Confirm",
                         Callback = function()
-                            loadstring(game:HttpGet("https://raw.githubusercontent.com/ScriptingAct/Esp2/refs/heads/main/Cho"))()
+                            loadstring(game:HttpGet("https://raw.githubusercontent.com/ScriptingAct/Wavee/refs/heads/main/Espitem"))()
                         end
                     },
                     {

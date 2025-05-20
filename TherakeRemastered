@@ -1,279 +1,248 @@
+-- Load Shaman UI Library
+local Library = loadstring(game:HttpGet('https://raw.githubusercontent.com/Rain-Design/Libraries/main/Shaman/Library.lua'))()
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Lighting = game:GetService("Lighting")
+local RunService = game:GetService("RunService")
+local Workspace = game:GetService("Workspace")
 
-local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
-local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/SaveManager.lua"))()
-local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/InterfaceManager.lua"))()
+local LocalPlayer = Players.LocalPlayer
+local Flags = Library.Flags
 
-local Window = Fluent:CreateWindow({
-    Title = "Wave_Hub [The_Rake_Remastered] " .. Fluent.Version,
-    SubTitle = "by SPSEA",
-    TabWidth = 160,
-    Size = UDim2.fromOffset(580, 460),
-    Acrylic = true, -- The blur may be detectable, setting this to false disables blur entirely
-    Theme = "Aqua",
-    MinimizeKey = Enum.KeyCode.Delete -- Used when theres no MinimizeKeybind
+-- UI Setup
+local Window = Library:Window({ Text = "The Rake: Remastered" })
+local MainTab = Window:Tab({ Text = "Main" })
+local VisualTab = Window:Tab({ Text = "Visual" })
+local StatusTab = Window:Tab({ Text = "Status" })
+
+-- Sections
+local Gameplay = MainTab:Section({ Text = "Gameplay" })
+local Morphs = MainTab:Section({ Text = "Morphs" })
+local Teleport = MainTab:Section({ Text = "Teleport" })
+local ESP = VisualTab:Section({ Text = "ESP" })
+local Status = StatusTab:Section({ Text = "Live Info" })
+
+-- Status Labels
+local FlareLabel = Status:Label({ Text = "Flare Gun: Unknown" })
+local RakeLabel = Status:Label({ Text = "Rake: Unknown" })
+local BloodHourLabel = Status:Label({ Text = "Blood Hour: Unknown" })
+
+-- Status Updater
+RunService.RenderStepped:Connect(function()
+    local flare = Workspace:FindFirstChild("FlareGun") or Workspace:FindFirstChildWhichIsA("Tool", true)
+    FlareLabel:Set({ Text = flare and "Flare Gun: Spawned" or "Flare Gun: Not Found" })
+
+    local rake = Workspace:FindFirstChild("Rake") or Workspace:FindFirstChild("RakeAI")
+    RakeLabel:Set({ Text = rake and "Rake: Active" or "Rake: Not Spawned" })
+
+    local bh = ReplicatedStorage:FindFirstChild("BloodHour")
+    BloodHourLabel:Set({ Text = bh and bh.Value and "Blood Hour: ACTIVE" or "Blood Hour: Inactive" })
+end)
+
+-- WalkSpeed Bypass
+local walkSpeedConnection
+Gameplay:Toggle({
+    Text = "WalkSpeed Bypass (30)",
+    Callback = function(state)
+        if walkSpeedConnection then walkSpeedConnection:Disconnect() end
+        if state then
+            walkSpeedConnection = RunService.RenderStepped:Connect(function()
+                local hum = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+                if hum and hum.WalkSpeed ~= 30 then hum.WalkSpeed = 30 end
+            end)
+        end
+    end
 })
 
---Fluent provides Lucide Icons https://lucide.dev/icons/ for the tabs, icons are optional
-local Tabs = {
-    Main = Window:AddTab({ Title = "Main", Icon = "" }),
-    Settings = Window:AddTab({ Title = "Settings", Icon = "settings" })
-
-}
-
-local Options = Fluent.Options
-
-do
-    Fluent:Notify({
-        Title = "Notification",
-        Content = "Thanks for buy my script",
-        SubContent = "Wave", -- Optional
-        Duration = 5 -- Set to nil to make the notification not disappear
-    })
-
-
-
-    Tabs.Main:AddButton({
-        Title = "Nametags",
-        Description = "See Everything in the game",
-        Callback = function()
-            Window:Dialog({
-                Title = "Confirm",
-                Content = "You want to execute this script ?",
-                Buttons = {
-                    {
-                        Title = "Confirm",
-                        Callback = function()
-                            loadstring(game:HttpGet("https://raw.githubusercontent.com/irlng/TheRakeRemastered/main/TheRake.lua"))()
-                        end
-                    },
-                    {
-                        Title = "Cancel",
-                        Callback = function()
-                            print("Cancelled the dialog.")
-                        end
-                    }
-                }
-            })
+-- Infinite Stamina
+Gameplay:Toggle({
+    Text = "Infinite Stamina",
+    Callback = function(state)
+        RunService:UnbindFromRenderStep("Stamina")
+        if state then
+            RunService:BindToRenderStep("Stamina", 100, function()
+                local energy = LocalPlayer:FindFirstChild("Energy")
+                if energy then energy.Value = 100 end
+            end)
         end
-    })
+    end
+})
 
-    Tabs.Main:AddButton({
-        Title = "Fullbright",
-        Description = "No fog and full light",
-        Callback = function()
-            Window:Dialog({
-                Title = "Confirm",
-                Content = "You want to execute this script ?",
-                Buttons = {
-                    {
-                        Title = "Confirm",
-                        Callback = function()
-                            loadstring(game:HttpGet("https://pastebin.com/raw/xT0a1N6n"))()
-                        end
-                    },
-                    {
-                        Title = "Cancel",
-                        Callback = function()
-                            print("Cancelled the dialog.")
-                        end
-                    }
-                }
-            })
-        end
-    })
+-- Full Bright with Lighting override
+Gameplay:Toggle({
+    Text = "Full Bright",
+    Callback = function(state)
+        local Light = game:GetService("Lighting")
 
-    Tabs.Main:AddButton({
-        Title = "Fast Walk",
-        Description = "Do not use stamina",
-        Callback = function()
-            Window:Dialog({
-                Title = "Confirm",
-                Content = "You want to execute this script ?",
-                Buttons = {
-                    {
-                        Title = "Confirm",
-                        Callback = function()
-                            loadstring(game:HttpGet("https://raw.githubusercontent.com/ScriptingAct/walksped/refs/heads/main/fortherake"))()
-                        end
-                    },
-                    {
-                        Title = "Cancel",
-                        Callback = function()
-                            print("Cancelled the dialog.")
-                        end
-                    }
-                }
-            })
-        end
-    })
-
-    Tabs.Main:AddButton({
-        Title = "Fov for Gaming",
-        Description = "Fov = 120",
-        Callback = function()
-            Window:Dialog({
-                Title = "Confirm",
-                Content = "You want to execute this script ?",
-                Buttons = {
-                    {
-                        Title = "Confirm",
-                        Callback = function()
-                            loadstring(game:HttpGet("https://pastebin.com/raw/Sf6E0pzH"))()
-                        end
-                    },
-                    {
-                        Title = "Cancel",
-                        Callback = function()
-                            print("Cancelled the dialog.")
-                        end
-                    }
-                }
-            })
-        end
-    })
-
-    Tabs.Main:AddButton({
-        Title = "No Fall Damage",
-        Description = "Never take damage",
-        Callback = function()
-            Window:Dialog({
-                Title = "Confirm",
-                Content = "You want to execute this script ?",
-                Buttons = {
-                    {
-                        Title = "Confirm",
-                        Callback = function()
-                            loadstring(game:HttpGet("https://raw.githubusercontent.com/ScriptingAct/walksped/refs/heads/main/falldamage"))()
-                        end
-                    },
-                    {
-                        Title = "Cancel",
-                        Callback = function()
-                            print("Cancelled the dialog.")
-                        end
-                    }
-                }
-            })
-        end
-    })
-
-local Colorpicker = Tabs.Settings:AddColorpicker("Colorpicker", {
-        Title = "Colorpicker",
-        Default = Color3.fromRGB(96, 205, 255)
-    })
-
-    Colorpicker:OnChanged(function()
-        print("Colorpicker changed:", Colorpicker.Value)
-    end)
-    
-    Colorpicker:SetValueRGB(Color3.fromRGB(0, 255, 140))
-
-
-
-    local TColorpicker = Tabs.Settings:AddColorpicker("TransparencyColorpicker", {
-        Title = "Colorpicker",
-        Description = "but you can change the transparency.",
-        Transparency = 0,
-        Default = Color3.fromRGB(96, 205, 255)
-    })
-
-    TColorpicker:OnChanged(function()
-        print(
-            "TColorpicker changed:", TColorpicker.Value,
-            "Transparency:", TColorpicker.Transparency
-        )
-    end)
-
-
-
-    local Keybind = Tabs.Settings:AddKeybind("Keybind", {
-        Title = "KeyBind",
-        Mode = "Toggle", -- Always, Toggle, Hold
-        Default = "Deleted", -- String as the name of the keybind (MB1, MB2 for mouse buttons)
-
-        -- Occurs when the keybind is clicked, Value is `true`/`false`
-        Callback = function(Value)
-            print("Keybind clicked!", Value)
-        end,
-
-        -- Occurs when the keybind itself is changed, `New` is a KeyCode Enum OR a UserInputType Enum
-        ChangedCallback = function(New)
-            print("Keybind changed!", New)
-        end
-    })
-
-    -- OnClick is only fired when you press the keybind and the mode is Toggle
-    -- Otherwise, you will have to use Keybind:GetState()
-    Keybind:OnClick(function()
-        print("Keybind clicked:", Keybind:GetState())
-    end)
-
-    Keybind:OnChanged(function()
-        print("Keybind changed:", Keybind.Value)
-    end)
-
-    task.spawn(function()
-        while true do
-            wait(1)
-
-            -- example for checking if a keybind is being pressed
-            local state = Keybind:GetState()
+        local function dofullbright()
             if state then
-                print("Keybind is being held down")
+                Light.Ambient = Color3.new(1, 1, 1)
+                Light.ColorShift_Bottom = Color3.new(1, 1, 1)
+                Light.ColorShift_Top = Color3.new(1, 1, 1)
+                Light.Brightness = 3
+                Light.FogEnd = 100000
             end
-
-            if Fluent.Unloaded then break end
         end
-    end)
 
-    Keybind:SetValue("MB2", "Toggle") -- Sets keybind to MB2, mode to Hold
-
-
-    local Input = Tabs.Settings:AddInput("Input", {
-        Title = "Input",
-        Default = "Default",
-        Placeholder = "Placeholder",
-        Numeric = false, -- Only allows numbers
-        Finished = false, -- Only calls callback when you press enter
-        Callback = function(Value)
-            print("Input changed:", Value)
+        if Flags.FullBrightConnection then
+            Flags.FullBrightConnection:Disconnect()
+            Flags.FullBrightConnection = nil
         end
-    })
 
-    Input:OnChanged(function()
-        print("Input updated:", Input.Value)
-    end)
+        if state then
+            dofullbright()
+            Flags.FullBrightConnection = Light.LightingChanged:Connect(dofullbright)
+        else
+            Light.Ambient = Color3.new(0, 0, 0)
+            Light.ColorShift_Bottom = Color3.new(0, 0, 0)
+            Light.ColorShift_Top = Color3.new(0, 0, 0)
+            Light.Brightness = 1
+            Light.FogEnd = 1000
+        end
+    end
+})
+
+-- No Fall Damage
+Gameplay:Toggle({
+    Text = "No Fall Damage",
+    Callback = function(state)
+        local function onChar(char)
+            local hum = char:FindFirstChildOfClass("Humanoid")
+            if hum and state then
+                hum.StateChanged:Connect(function(_, newState)
+                    if newState == Enum.HumanoidStateType.Freefall then
+                        hum:ChangeState(Enum.HumanoidStateType.Jumping)
+                    end
+                end)
+            end
+        end
+        if LocalPlayer.Character then onChar(LocalPlayer.Character) end
+        LocalPlayer.CharacterAdded:Connect(onChar)
+    end
+})
+
+-- Morphs
+local function MorphInto(name)
+    local morph = ReplicatedStorage:FindFirstChild("Morphs") and ReplicatedStorage.Morphs:FindFirstChild(name)
+    if morph then ReplicatedStorage:WaitForChild("CharChange"):FireServer(morph) end
 end
 
--- Hand the library over to our managers
-SaveManager:SetLibrary(Fluent)
-InterfaceManager:SetLibrary(Fluent)
+Morphs:Button({ Text = "Blood Rake", Callback = function() MorphInto("BloodRakeMorph") end })
+Morphs:Button({ Text = "Rage Rake", Callback = function() MorphInto("RageRakeMorph") end })
+Morphs:Button({ Text = "Shadow Rake", Callback = function() MorphInto("ShadowHourRake") end })
+Morphs:Button({ Text = "Vision Rake", Callback = function() MorphInto("VisionRakeMorph") end })
+Morphs:Button({ Text = "Corrupted Rake", Callback = function() MorphInto("CorrupteredRakeMorph") end })
 
--- Ignore keys that are used by ThemeManager.
--- (we dont want configs to save themes, do we?)
-SaveManager:IgnoreThemeSettings()
+-- Teleport to Flare Gun
+local autoTPConnection
 
--- You can add indexes of elements the save manager should ignore
-SaveManager:SetIgnoreIndexes({})
-
--- use case for doing it this way:
--- a script hub could have themes in a global folder
--- and game configs in a separate folder per game
-InterfaceManager:SetFolder("FluentScriptHub")
-SaveManager:SetFolder("FluentScriptHub/specific-game")
-
-InterfaceManager:BuildInterfaceSection(Tabs.Settings)
-SaveManager:BuildConfigSection(Tabs.Settings)
-
-
-Window:SelectTab(1)
-
-Fluent:Notify({
-    Title = "Wave_Hub",
-    Content = "The script has been loaded.",
-    Duration = 8
+Teleport:Button({
+    Text = "Teleport to Flare Gun",
+    Callback = function()
+        for _, obj in pairs(Workspace:GetDescendants()) do
+            if obj:IsA("Tool") and obj.Name:lower():find("flare") then
+                if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                    LocalPlayer.Character.HumanoidRootPart.CFrame = obj.Handle.CFrame + Vector3.new(0, 3, 0)
+                end
+                break
+            end
+        end
+    end
 })
 
--- You can use the SaveManager:LoadAutoloadConfig() to load a config
--- which has been marked to be one that auto loads!
-SaveManager:LoadAutoloadConfig()
+Teleport:Toggle({
+    Text = "Auto Teleport to Flare Gun",
+    Callback = function(state)
+        if autoTPConnection then autoTPConnection:Disconnect() end
+        if state then
+            autoTPConnection = RunService.RenderStepped:Connect(function()
+                for _, obj in pairs(Workspace:GetDescendants()) do
+                    if obj:IsA("Tool") and obj.Name:lower():find("flare") then
+                        if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                            LocalPlayer.Character.HumanoidRootPart.CFrame = obj.Handle.CFrame + Vector3.new(0, 3, 0)
+                        end
+                        break
+                    end
+                end
+            end)
+        end
+    end
+})
+
+-- ESP Helpers
+local activeESP = {}
+
+local function applyHighlight(obj, color)
+    if not obj or not obj:IsDescendantOf(Workspace) then return end
+    if not activeESP[obj] and obj:FindFirstChild("HumanoidRootPart") then
+        local h = Instance.new("Highlight", obj)
+        h.FillColor = color
+        h.OutlineColor = color
+        h.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+        activeESP[obj] = h
+    end
+end
+
+local function clearESP()
+    for obj, h in pairs(activeESP) do
+        if h then h:Destroy() end
+    end
+    activeESP = {}
+end
+
+-- ESP Toggles
+ESP:Toggle({
+    Text = "ESP: Rake",
+    Callback = function(state)
+        RunService:UnbindFromRenderStep("RakeESP")
+        if state then
+            RunService:BindToRenderStep("RakeESP", 1, function()
+                for _, v in pairs(Workspace:GetChildren()) do
+                    if v.Name:lower():find("rake") then
+                        applyHighlight(v, Color3.fromRGB(255, 0, 0))
+                    end
+                end
+            end)
+        else
+            clearESP()
+        end
+    end
+})
+
+ESP:Toggle({
+    Text = "ESP: Players",
+    Callback = function(state)
+        RunService:UnbindFromRenderStep("PlayerESP")
+        if state then
+            RunService:BindToRenderStep("PlayerESP", 1, function()
+                for _, p in pairs(Players:GetPlayers()) do
+                    if p ~= LocalPlayer and p.Character then
+                        applyHighlight(p.Character, Color3.fromRGB(0, 170, 255))
+                    end
+                end
+            end)
+        else
+            clearESP()
+        end
+    end
+})
+
+ESP:Toggle({
+    Text = "ESP: Flare Gun",
+    Callback = function(state)
+        RunService:UnbindFromRenderStep("FlareESP")
+        if state then
+            RunService:BindToRenderStep("FlareESP", 1, function()
+                for _, obj in pairs(Workspace:GetDescendants()) do
+                    if obj:IsA("Tool") and obj.Name:lower():find("flare") then
+                        applyHighlight(obj, Color3.fromRGB(255, 255, 0))
+                    end
+                end
+            end)
+        else
+            clearESP()
+        end
+    end
+})
+
+MainTab:Select()
